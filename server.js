@@ -5,6 +5,7 @@ const morgan = require('morgan');
 
 // Config / DB
 const { connectDB } = require('./config/db');
+const { swaggerSpec, swaggerUi } = require('./config/swagger');
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -14,6 +15,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: `
+    .swagger-ui .topbar { display: none }
+    .swagger-ui .info hgroup.main h2 { color: #3b4151 }
+  `,
+  customSiteTitle: 'Takkeh API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+  },
+}));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // Mount routes
 app.use('/', routes);

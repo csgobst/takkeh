@@ -37,6 +37,18 @@ Security Note: The sample `.env` values (Mongo URI, JWT secret) are for local/de
 2. Run in dev mode: `npm run dev`
 3. Visit: http://localhost:3000/health
 
+## API Documentation
+Interactive Swagger documentation is available at:
+- **Swagger UI**: http://localhost:3000/api-docs
+- **JSON Spec**: http://localhost:3000/api-docs.json
+
+The Swagger documentation includes:
+- Complete API reference for all endpoints
+- Interactive request/response examples
+- Authentication flow documentation
+- Schema definitions for all data models
+- Try-it-out functionality for testing endpoints
+
 ## Health Check
 `GET /health` returns service status.
 
@@ -170,7 +182,31 @@ Future admin endpoint (not yet implemented) will toggle `confirmedAccount` and n
 - Add email/SMS gateway integration.
 - Add admin approval endpoints.
 - Password reset & account lockout on brute force.
- - Role-based authorization middleware for differentiated resource access.
+- Role-based authorization middleware for differentiated resource access.
+
+## API Testing with Swagger
+
+The Swagger UI provides an interactive interface for testing the API:
+
+1. **Authentication Testing**:
+   - Use the `/auth/{userType}/signup` endpoints to create accounts
+   - Login via `/auth/{userType}/login` to get access tokens
+   - Copy the `accessToken` from login response
+   - Click "Authorize" button in Swagger UI
+   - Enter `Bearer <your-access-token>` in the Authorization field
+
+2. **Protected Endpoints**:
+   - All verification, resend, refresh, and logout endpoints require authentication
+   - The `/secure/verified-ping` endpoint requires full verification (both email and phone)
+
+3. **User Types**:
+   - **Customer**: Full access after email/phone verification
+   - **Vendor**: Limited access until admin confirms account (`confirmedAccount: true`)
+   - **Driver**: Limited access until admin confirms account (`confirmedAccount: true`)
+
+4. **OTP Testing**:
+   - OTP codes are logged to console for development (not returned in API responses)
+   - In production, OTPs will be sent via email/SMS providers
 
 ## License
 MIT
