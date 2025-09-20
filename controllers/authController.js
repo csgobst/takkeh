@@ -48,19 +48,19 @@ exports.login = asyncHandler(async (req, res) => {
 });
 
 exports.refresh = asyncHandler(async (req, res) => {
-  const { userType, userId, refreshToken } = req.body;
-  if (!userType || !userId || !refreshToken) {
-    return res.status(400).json({ message: 'userType, userId, refreshToken required' });
-  }
-  const result = await refresh({ userType, userId, token: refreshToken });
+  const { userType, refreshToken } = req.body;
+  if (!userType) return res.status(400).json({ message: 'userType required' });
+  if (!req.user || !req.user.uid) return res.status(401).json({ message: 'Unauthorized' });
+  if (!refreshToken) return res.status(400).json({ message: 'refreshToken required' });
+  const result = await refresh({ userType, userId: req.user.uid, token: refreshToken });
   res.json(result);
 });
 
 exports.logout = asyncHandler(async (req, res) => {
-  const { userType, userId, refreshToken } = req.body;
-  if (!userType || !userId || !refreshToken) {
-    return res.status(400).json({ message: 'userType, userId, refreshToken required' });
-  }
-  const result = await logout({ userType, userId, token: refreshToken });
+  const { userType, refreshToken } = req.body;
+  if (!userType) return res.status(400).json({ message: 'userType required' });
+  if (!req.user || !req.user.uid) return res.status(401).json({ message: 'Unauthorized' });
+  if (!refreshToken) return res.status(400).json({ message: 'refreshToken required' });
+  const result = await logout({ userType, userId: req.user.uid, token: refreshToken });
   res.json(result);
 });

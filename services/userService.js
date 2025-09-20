@@ -46,10 +46,17 @@ async function upsertOtp({ userType, userId, channel, email, phone }) {
 async function createUser({ userType, name, email, phone, password }) {
   const Model = getModelByType(userType);
   const existingEmail = await Model.findOne({ email });
-  if (existingEmail) throw new Error('Email already registered');
+  if (existingEmail) {
+    const err = new Error('Email already registered');
+    err.status = 409;
+    throw err;
+  }
   const existingPhone = await Model.findOne({ phone });
-  if (existingPhone) throw new Error('Phone already registered');
-
+  if (existingPhone) {
+    const err = new Error('Phone already registered');
+    err.status = 409;
+    throw err;
+  }
   if (!password) throw new Error('Password required');
   const passwordHash = await bcrypt.hash(password, 10);
 
@@ -73,11 +80,18 @@ function sanitizeUser(doc, userType) {
   return { ...json, userType };
 }
 
-async function verifyOtp({ userType, email, phone, channel, code }) {
+async function verifyOtp({ userType, email, phone, channel, code, authUser }) {
   const Model = getModelByType(userType);
-  const lookup = channel === 'email' ? { email } : { phone };
-  if (!lookup.email && !lookup.phone) throw new Error('Provide email or phone for verification');
-  const user = await Model.findOne(lookup);
+  let user = null;
+  // If authUser present and matches userType, prefer that
+  if (authUser && authUser.userType === userType) {
+    user = await Model.findById(authUser.uid);
+  }
+  if (!user) {
+    const lookup = channel === 'email' ? { email } : { phone };
+    if (!lookup.email && !lookup.phone) throw new Error('Provide email or phone for verification');
+    user = await Model.findOne(lookup);
+  }
   if (!user) throw new Error('User not found');
 
   // Prefer direct lookup by email/phone for quicker matching
@@ -156,7 +170,6 @@ async function login({ userType, email, phone, password }) {
     user: sanitizeUser(user, userType),
     accessToken,
     refreshToken,
-    expiresInMinutes: ACCESS_TOKEN_TTL_MIN,
     fullyVerified,
     limited: limitedApproval,
     message: !fullyVerified ? 'Email/Phone not fully verified yet.' : (limitedApproval ? 'Account pending approval by Super Admin.' : 'Login successful')
@@ -187,7 +200,7 @@ async function refresh({ userType, userId, token }) {
     limited: (userType === 'vendor' || userType === 'driver') && !user.confirmedAccount
   };
   const accessToken = signAccessToken(payload);
-  return { accessToken, expiresInMinutes: ACCESS_TOKEN_TTL_MIN };
+  return { accessToken };
 }
 
 async function logout({ userType, userId, token }) {
