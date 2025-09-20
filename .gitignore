@@ -1,0 +1,39 @@
+node_modules/
+.env
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+coverage/
+
+# Additional standard ignores
+yarn-debug.log*
+pnpm-debug.log*
+package-lock.json
+
+# Logs
+logs
+*.log
+
+# OS / IDE
+Thumbs.db
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variants
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temp
+*.swp
+.tmp
+.temp
+
+# Misc
+*.tgz
