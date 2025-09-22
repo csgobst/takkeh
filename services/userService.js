@@ -1,4 +1,4 @@
-// Auth / User service implementing signup, OTP, verification, login, refresh, logout.
+// Auth / User service implementing signup, OTP, verification, login, refresh, logout.s
 
 const bcrypt = require('bcrypt');
 const Otp = require('../models/Otp');
